@@ -83,21 +83,31 @@ public class ObservableToolCallingManager implements ToolCallingManager {
 
 	private final ToolExecutionExceptionProcessor toolExecutionExceptionProcessor;
 
-	// TODO Mandatory Convention as ARMS implementation until the Spring AI project
-	// officially supports for observation
-	private final ArmsToolCallingObservationConvention observationConvention = DEFAULT_OBSERVATION_CONVENTION;
+        // Default ARMS observation convention until the Spring AI project officially
+        // supports observation. Can be overridden via the builder.
+        private final ArmsToolCallingObservationConvention observationConvention;
 
-	public ObservableToolCallingManager(ObservationRegistry observationRegistry,
-			ToolCallbackResolver toolCallbackResolver,
-			ToolExecutionExceptionProcessor toolExecutionExceptionProcessor) {
-		Assert.notNull(observationRegistry, "observationRegistry cannot be null");
-		Assert.notNull(toolCallbackResolver, "toolCallbackResolver cannot be null");
-		Assert.notNull(toolExecutionExceptionProcessor, "toolCallExceptionConverter cannot be null");
+        public ObservableToolCallingManager(ObservationRegistry observationRegistry,
+                        ToolCallbackResolver toolCallbackResolver,
+                        ToolExecutionExceptionProcessor toolExecutionExceptionProcessor) {
+                this(observationRegistry, toolCallbackResolver, toolExecutionExceptionProcessor,
+                                DEFAULT_OBSERVATION_CONVENTION);
+        }
 
-		this.observationRegistry = observationRegistry;
-		this.toolCallbackResolver = toolCallbackResolver;
-		this.toolExecutionExceptionProcessor = toolExecutionExceptionProcessor;
-	}
+        public ObservableToolCallingManager(ObservationRegistry observationRegistry,
+                        ToolCallbackResolver toolCallbackResolver,
+                        ToolExecutionExceptionProcessor toolExecutionExceptionProcessor,
+                        ArmsToolCallingObservationConvention observationConvention) {
+                Assert.notNull(observationRegistry, "observationRegistry cannot be null");
+                Assert.notNull(toolCallbackResolver, "toolCallbackResolver cannot be null");
+                Assert.notNull(toolExecutionExceptionProcessor, "toolCallExceptionConverter cannot be null");
+                Assert.notNull(observationConvention, "observationConvention cannot be null");
+
+                this.observationRegistry = observationRegistry;
+                this.toolCallbackResolver = toolCallbackResolver;
+                this.toolExecutionExceptionProcessor = toolExecutionExceptionProcessor;
+                this.observationConvention = observationConvention;
+        }
 
 	@Override
 	public List<ToolDefinition> resolveToolDefinitions(ToolCallingChatOptions chatOptions) {
@@ -304,7 +314,9 @@ public class ObservableToolCallingManager implements ToolCallingManager {
 
 		private ToolCallbackResolver toolCallbackResolver = DEFAULT_TOOL_CALLBACK_RESOLVER;
 
-		private ToolExecutionExceptionProcessor toolExecutionExceptionProcessor = DEFAULT_TOOL_EXECUTION_EXCEPTION_PROCESSOR;
+                private ToolExecutionExceptionProcessor toolExecutionExceptionProcessor = DEFAULT_TOOL_EXECUTION_EXCEPTION_PROCESSOR;
+
+                private ArmsToolCallingObservationConvention observationConvention = DEFAULT_OBSERVATION_CONVENTION;
 
 		private Builder() {
 		}
@@ -319,16 +331,22 @@ public class ObservableToolCallingManager implements ToolCallingManager {
 			return this;
 		}
 
-		public ObservableToolCallingManager.Builder toolExecutionExceptionProcessor(
-				ToolExecutionExceptionProcessor toolExecutionExceptionProcessor) {
-			this.toolExecutionExceptionProcessor = toolExecutionExceptionProcessor;
-			return this;
-		}
+                public ObservableToolCallingManager.Builder toolExecutionExceptionProcessor(
+                                ToolExecutionExceptionProcessor toolExecutionExceptionProcessor) {
+                        this.toolExecutionExceptionProcessor = toolExecutionExceptionProcessor;
+                        return this;
+                }
 
-		public ObservableToolCallingManager build() {
-			return new ObservableToolCallingManager(observationRegistry, toolCallbackResolver,
-					toolExecutionExceptionProcessor);
-		}
+                public ObservableToolCallingManager.Builder observationConvention(
+                                ArmsToolCallingObservationConvention observationConvention) {
+                        this.observationConvention = observationConvention;
+                        return this;
+                }
+
+                public ObservableToolCallingManager build() {
+                        return new ObservableToolCallingManager(observationRegistry, toolCallbackResolver,
+                                        toolExecutionExceptionProcessor, observationConvention);
+                }
 
 	}
 
